@@ -1,0 +1,7 @@
+body {
+  background: rgb(121, 124, 124);
+  margin-top: 50px;
+  margin-left: 100px;
+}
+
+.courier {font-family: 'Courier New', Courier, monospace;}
