@@ -34,3 +34,5 @@ class movement_list():
       self.http_sending.send('http://192.168.178.248:80/post', f"M:{i.number},{i.degrees}", headers)
       seconds = 0.001 * float(i.delay)
       time.sleep(seconds)
+    self.full_list_of_commands = []
+    self.full_list_strings = []
