@@ -1,5 +1,9 @@
 #include "connection.hpp"
+#include <functional>
+#include <string>
+#include <algorithm>
 
+using namespace std::placeholders;
 EventGroupHandle_t wifi_driver::events;
 
 esp_err_t wifi_driver::wifi_handler(void *data, system_event_t *event){
@@ -43,77 +47,85 @@ void wifi_driver::wait_for_connection(){
   xEventGroupWaitBits(wifi_driver::events, BIT0, false, true, portMAX_DELAY);
 }
 
-esp_err_t data_sending::event_handler(esp_http_client_event_t * event){
-  switch (event->event_id){
-    case HTTP_EVENT_ERROR:
-      ESP_LOGD(SERVER_TAG, "HTTP_EVENT_ERROR");
-      break;
-    case HTTP_EVENT_ON_CONNECTED:
-      ESP_LOGD(SERVER_TAG, "HTTP_EVENT_ON_CONNECTED");
-      break;
-    case HTTP_EVENT_HEADER_SENT:
-      ESP_LOGD(SERVER_TAG, "HTTP_EVENT_HEADER_SENT");
-      break;
-    case HTTP_EVENT_ON_HEADER:
-      ESP_LOGD(SERVER_TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", event->header_key,
-        event->header_value);
-      break;
-    case HTTP_EVENT_ON_DATA:
-      ESP_LOGD(SERVER_TAG, "HTTP_EVENT_ON_DATA, len=%d", event->data_len);
-      break;
-    case HTTP_EVENT_ON_FINISH:
-      ESP_LOGD(SERVER_TAG, "HTTP_EVENT_ON_FINISH");
-      break;
-    case HTTP_EVENT_DISCONNECTED:
-      ESP_LOGD(SERVER_TAG, "HTTP_EVENT_DISCONNECTED");
-      break;
-  }
-  return ESP_FAIL;
-}
+esp_err_t http_server::POST_handler(httpd_req_t * req){
+  char buf[100];
+  unsigned int ret, remaining = req->content_len;
 
-data_sending::data_sending():
-  task(SERVER_TAG),
-  client(nullptr),
-  wifi()
-{
-}
-
-void data_sending::connect_to_server(std::string server_url){
-  esp_http_client_config_t config = {};
-
-  config.url = server_url.c_str();
-  config.event_handler = data_sending::event_handler;
-
-  client = esp_http_client_init(&config);
-  esp_http_client_set_url(client, server_url.c_str());
-}
-
-void data_sending::send_POST_request(std::string data){
-
-  esp_http_client_set_header(client, "Content-Type", "application/json");
-  esp_http_client_set_method(client, HTTP_METHOD_POST);
-  esp_http_client_set_post_field(client, data.c_str(), data.size());
-  esp_err_t error = esp_http_client_perform(client);
-  if(error == ESP_OK){
-    ESP_LOGI(SERVER_TAG, "HTTP POST Status = %d, content_length = %d",
-            esp_http_client_get_status_code(client),
-            esp_http_client_get_content_length(client));
-  } else {
-    ESP_LOGE(SERVER_TAG, "HTTP POST request failed: %s", esp_err_to_name(error));
-  }
-}
-
-void data_sending::run(void * data){
-  for(;;){
-    wifi.wait_for_connection();
-
-    if(!client){
-      connect_to_server("http://192.168.2.13:5000/upload_data");
-    }else{
-      //send_data_point_POST_request(accelerometer.get_data());
+  while (remaining > 0) {
+    /* Read the data for the request */
+    if ((ret = httpd_req_recv(req, buf, std::min(remaining, sizeof(buf)))) <= 0) {
+      if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
+      /* Retry receiving if timeout occurred */
+      continue;
+      }
+      return ESP_FAIL;
     }
 
-    delay(100);
+    remaining -= ret;
 
+    std::string buffer(buf);
+    uint8_t servo_slot = std::stoi(buffer.substr(buffer.find(':')+1, buffer.find(',')));
+    uint8_t degrees = std::stoi(buffer.substr(buffer.find(",")+1));
+    if(http_server::get_instance()->has_direction_queue()){
+      std::cout << "Added to queue" << servo_command{servo_slot, degrees} << std::endl;
+      http_server::get_instance()->add_to_direction_queue(servo_command{servo_slot, degrees});
+    }else {
+      std::cout << "No queue added!" << std::endl;
+    }
+  }
+
+  httpd_resp_send_chunk(req, NULL, 0);
+  return ESP_OK;
+}
+
+esp_err_t http_server::GET_handler(httpd_req_t * req){
+  return ESP_OK;
+}
+
+http_server::http_server():
+  server(nullptr),
+  handles(),
+  command_queue(nullptr)
+{
+  handles.push_back(httpd_uri_t{"/post", HTTP_POST, 
+                      http_server::POST_handler, this});
+  handles.push_back(httpd_uri_t{"/get", HTTP_GET,
+                      http_server::GET_handler, this});
+}
+
+http_server * http_server::get_instance(){
+  if(!instance){
+    instance = new http_server();
+  }
+  return instance;
+}
+
+void http_server::start_webserver(){
+  httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+  config.lru_purge_enable = true;
+
+  ESP_LOGI("SERVER", "Starting server on port: '%d'", config.server_port);
+  if (httpd_start(&server, &config) == ESP_OK) {
+        // Set URI handlers
+        ESP_LOGI("Server", "Registering URI handlers");
+        for(auto handle : handles){
+          httpd_register_uri_handler(server, &handle);
+        }
+  }else {
+    ESP_LOGI("Server", "Error starting server!");
+  }
+}
+
+void http_server::add_direction_queue(queue<servo_command, 20> * queue_to_use){
+  command_queue = queue_to_use;
+}
+
+bool http_server::has_direction_queue(){
+  return (command_queue != nullptr);
+}
+
+void http_server::add_to_direction_queue(servo_command data){
+  if(has_direction_queue()){
+    command_queue->add(data, TickType_t(100));
   }
 }

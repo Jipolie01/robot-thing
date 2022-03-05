@@ -10,6 +10,8 @@
 #include "pca9685.hpp"
 #include "queue.hpp"
 #include "base.hpp"
+#include "connection.hpp"
+
 
 #include <string>
 
@@ -20,21 +22,34 @@ extern "C" {
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_err.h"
+#include "nvs_flash.h"
 
 #define UART_INPUT
 
 void app_main(void)
 {
     printf("Hello world!\n");
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
 
 #ifdef UART_INPUT
 
     auto hello =  new queue<servo_command, 20>;
     auto test = new jip_custom_board(hello);
-    auto user = new command_line_base(hello);
 
+    auto connection = http_server::get_instance();
+    auto wifi = new wifi_driver();
+
+
+    wifi->wait_for_connection();
+    std::cout << "Connected" << std::endl;
+    connection->add_direction_queue(hello);
+    connection->start_webserver();
     test->start();
-    user->start();
 #endif                        
     //body->start();
     //input->start();

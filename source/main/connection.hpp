@@ -5,10 +5,13 @@
 #include "freertos/event_groups.h"
 #include "esp_wifi.h"
 #include <esp_https_ota.h>
-#include "esp_log.h"
+#include <esp_log.h>
 #include "esp_event_loop.h"
 #include <sstream>
 #include <cstring>
+#include <vector>
+#include <esp_http_server.h>
+#include "pca9685.hpp"
 
 #define WIFI_NAME       "ZiggoC78F229"
 #define PASSWORD_NAME   "Nzfn2jukwjxn"
@@ -24,19 +27,25 @@ class wifi_driver{
     void wait_for_connection();
 };
 
-class data_sending : public task{
+class http_server{
   private:
-    esp_http_client_handle_t client;
-    wifi_driver wifi;
+    static inline http_server * instance = nullptr;
+    httpd_handle_t server;
+    std::vector<httpd_uri_t> handles;
+    queue<servo_command, 20> * command_queue;
 
-    static esp_err_t event_handler(esp_http_client_event_t * event);
+    static esp_err_t POST_handler(httpd_req_t * req);
+    static esp_err_t GET_handler(httpd_req_t * req);
+
+    http_server();
 
   public:
-    data_sending();
+    static http_server * get_instance();
 
-    void connect_to_server(std::string server_url);
-    void send_POST_request(std::string data);
-    std::string receive_request();
+    void start_webserver();
+    void add_direction_queue(queue<servo_command, 20> * queue_to_use);
 
-    void run(void * data) override;
+    bool has_direction_queue();
+    void add_to_direction_queue(servo_command data);
+
 };
