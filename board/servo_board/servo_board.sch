@@ -105,8 +105,8 @@ $Comp
 L Device:R R17
 U 1 1 609AFAFF
 P 8400 1950
-F 0 "R17" H 8470 1996 50  0000 L CNN
-F 1 "10k" V 8400 1900 50  0000 L CNN
+F 0 "R17" H 8200 1950 50  0000 L CNN
+F 1 "2.2k" V 8400 1850 50  0000 L CNN
 F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 8330 1950 50  0001 C CNN
 F 3 "~" H 8400 1950 50  0001 C CNN
 	1    8400 1950
@@ -117,7 +117,7 @@ L Device:R R18
 U 1 1 609B02BE
 P 8650 1850
 F 0 "R18" H 8720 1896 50  0000 L CNN
-F 1 "10k" V 8650 1800 50  0000 L CNN
+F 1 "2.2k" V 8650 1750 50  0000 L CNN
 F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 8580 1850 50  0001 C CNN
 F 3 "~" H 8650 1850 50  0001 C CNN
 	1    8650 1850
@@ -161,8 +161,8 @@ L Device:CP1 C1
 U 1 1 609C54BB
 P 5100 6900
 F 0 "C1" H 5215 6946 50  0000 L CNN
-F 1 "1000uF" H 5215 6855 50  0000 L CNN
-F 2 "Capacitor_SMD:CP_Elec_10x10.5" H 5100 6900 50  0001 C CNN
+F 1 "470uF" H 5215 6855 50  0000 L CNN
+F 2 "Capacitor_SMD:CP_Elec_6.3x7.7" H 5100 6900 50  0001 C CNN
 F 3 "~" H 5100 6900 50  0001 C CNN
 	1    5100 6900
 	1    0    0    -1  
@@ -361,9 +361,9 @@ Text GLabel 2250 1050 2    50   Input ~ 0
 right_wrist
 Text GLabel 5700 2850 2    50   Input ~ 0
 left_shoulder
-Text GLabel 10150 1400 2    50   Input ~ 0
+Text GLabel 10450 1400 2    50   Input ~ 0
 right_shoulder
-Text GLabel 9150 1200 0    50   Input ~ 0
+Text GLabel 8850 1200 0    50   Input ~ 0
 right_wrist
 Wire Wire Line
 	4000 2750 3900 2750
@@ -521,8 +521,6 @@ Text GLabel 9150 2200 0    50   Input ~ 0
 TX0
 Text GLabel 9150 2400 0    50   Input ~ 0
 D23
-Text GLabel 10150 1000 2    50   Input ~ 0
-VIN
 Text GLabel 10150 1200 2    50   Input ~ 0
 D13
 Text GLabel 10150 1300 2    50   Input ~ 0
@@ -545,8 +543,6 @@ Text GLabel 10150 2200 2    50   Input ~ 0
 VN
 Text GLabel 10150 2300 2    50   Input ~ 0
 VP
-Text GLabel 8900 4750 3    50   Input ~ 0
-VIN
 Text GLabel 9800 4750 3    50   Input ~ 0
 D34
 Text GLabel 9700 4750 3    50   Input ~ 0
@@ -1642,4 +1638,71 @@ Wire Wire Line
 	1450 1150 1050 1150
 Wire Wire Line
 	1450 2650 1450 2550
+$Comp
+L power:+5V #PWR0106
+U 1 1 622E565F
+P 10400 1000
+F 0 "#PWR0106" H 10400 850 50  0001 C CNN
+F 1 "+5V" H 10415 1173 50  0000 C CNN
+F 2 "" H 10400 1000 50  0001 C CNN
+F 3 "" H 10400 1000 50  0001 C CNN
+	1    10400 1000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10150 1000 10400 1000
+$Comp
+L power:+5V #PWR0107
+U 1 1 622F5244
+P 8900 4900
+F 0 "#PWR0107" H 8900 4750 50  0001 C CNN
+F 1 "+5V" H 8915 5073 50  0000 C CNN
+F 2 "" H 8900 4900 50  0001 C CNN
+F 3 "" H 8900 4900 50  0001 C CNN
+	1    8900 4900
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	8900 4900 8900 4750
+$Comp
+L Device:R R22
+U 1 1 62770A0F
+P 9000 1200
+F 0 "R22" V 9070 1246 50  0001 L CNN
+F 1 "220" V 9000 1150 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 8930 1200 50  0001 C CNN
+F 3 "~" H 9000 1200 50  0001 C CNN
+	1    9000 1200
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:R R23
+U 1 1 62774D84
+P 10300 1400
+F 0 "R23" V 10370 1446 50  0001 L CNN
+F 1 "220" V 10300 1350 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 10230 1400 50  0001 C CNN
+F 3 "~" H 10300 1400 50  0001 C CNN
+	1    10300 1400
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:CP1 C4
+U 1 1 6279D6D6
+P 5600 6900
+F 0 "C4" H 5715 6946 50  0000 L CNN
+F 1 "470uF" H 5715 6855 50  0000 L CNN
+F 2 "Capacitor_SMD:CP_Elec_6.3x7.7" H 5600 6900 50  0001 C CNN
+F 3 "~" H 5600 6900 50  0001 C CNN
+	1    5600 6900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5100 7200 5600 7200
+Wire Wire Line
+	5600 7200 5600 7050
+Wire Wire Line
+	5600 6750 5600 6600
+Wire Wire Line
+	5600 6600 5100 6600
 $EndSCHEMATC

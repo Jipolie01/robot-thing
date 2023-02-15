@@ -1,28 +1,37 @@
 <html>
   <head>
-    <link rel="stylesheet"  href="../static/main.css">
-    <h1>Home page</h1>
-    <p>Send values to robot</p>
-
-    <form action = "{{ url_for("index")}}" method="post">
-      <label for="servo">Servo number</label><br>
-      <input type="text" id="servo" name="servo"><br>
-      <label for="movement">Movement</label><br>
-      <input type="text" id="movement" name="movement"><br>
-      <label for="delay">Delay</label><br>
-      <input type="text" id="delay" name="delay" value="100"><br>
-      <input type="submit" name="send" value="Add command to queue robot">
-
   </head>
   <body>
-    <input type="submit" name="all_send" value="Send all commands to robot">
-      <br/><br/><br/><br/><br/><br/>
-      <tr>
+    <link rel="stylesheet"  href="../static/main.css">
+    <div class="row">
+      <div class="column">
+        <h1>Home page</h1>
+        <p>Send values to robot</p>
+
+        <form action = "{{ url_for("index")}}" method="post">
+        <label for="servo">Servo number</label><br>
+        <input type="text" id="servo" name="servo"><br>
+        <label for="movement">Movement</label><br>
+        <input type="text" id="movement" name="movement"><br>
+        <label for="delay">Delay</label><br>
+        <input type="text" id="delay" name="delay" value="100"><br>
+        <input type="submit" name="send" value="Add command to queue robot">
+        <input type="submit" name="all_send" value="Send all commands to robot">
+
+        <br/><br/><br/><br/><br/><br/>
+        <tr>
         {% for i in string_list %}
         <td>
           <div class="courier"><td>{{i}}</td></div><br/><br/>
         </td>
         {% endfor %}
-      </tr>
+        </tr>
+      </div>
+      <div class="column">
+        <h1>Movements</h1>
+        <input type="submit" name="idle" value="Idle"><br><br>
+        <input type="submit" name="walking" value="Walking">
+      </div>
+    </div>
   </body>
 </html>

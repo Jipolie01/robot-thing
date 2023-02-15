@@ -17,6 +17,7 @@ class movement_list():
     self.full_list_of_commands = []
     self.full_list_strings = []
     self.http_sending = http_sending()
+    self.headers = {'Content-type': 'text/html; charset=UTF-8'}
   
   def __str__(self):
     f = ""
@@ -29,10 +30,13 @@ class movement_list():
     self.full_list_of_commands.append(point)
 
   def send_all(self):
-    headers = {'Content-type': 'text/html; charset=UTF-8'}
     for i in self.full_list_of_commands:
-      self.http_sending.send('http://192.168.178.248:80/post', f"M:{i.number},{i.degrees}", headers)
+      self.http_sending.send('http://192.168.178.249:80/post', f"M:{i.number},{i.degrees}", self.headers)
       seconds = 0.001 * float(i.delay)
       time.sleep(seconds)
     self.full_list_of_commands = []
     self.full_list_strings = []
+
+  def send_list(self, list_of_movements):
+    for i in list_of_movements:
+        self.http_sending.send('http://192.168.178.249:80/post', f"M:{i.number},{i.degrees}", self.headers)

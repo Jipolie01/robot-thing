@@ -4,4 +4,9 @@ body {
   margin-left: 100px;
 }
 
+.column {
+  float: left;
+  width: 50%;
+}
+
 .courier {font-family: 'Courier New', Courier, monospace;}
